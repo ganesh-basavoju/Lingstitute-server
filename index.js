@@ -4,28 +4,14 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
+import uploadRoutes from "./routes/upload.route.js";
+import newsRoutes from "./routes/news.route.js";
 import { app, server } from "./lib/socket.js";
-import nodemailer from 'nodemailer';
-import multer from 'multer';
 
 dotenv.config();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, '/tmp/');
-    },
-    filename: (req, file, cb) => {
-        cb(null,file.originalname);
-    }
-
-});
-
-app.set("trust proxy", 1);
-
-const upload_file = multer({ storage });
 
 
 
@@ -37,17 +23,19 @@ app.use(
         credentials: true,
     })
 );
+app.set("trust proxy", 1);
+
 
 app.use("/api/auth", authRoutes);
+app.use("/api", uploadRoutes);
+app.use("/api", newsRoutes);
+
 
 
 app.listen(PORT, () => {
     console.log(`listening on port ${PORT}`);
     connectDB();
 });
-
-app.use(upload_file.array('img'));
-
 
 
 

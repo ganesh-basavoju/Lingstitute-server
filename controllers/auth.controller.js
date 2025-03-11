@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 import nodemailer from "nodemailer";
-import OTPModel from "../models/otp.model.js";
+import Otp from "../models/otp.model.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
@@ -100,7 +100,7 @@ export const forgotPassword = async (req, res) => {
         const otp = Math.floor(100000 + Math.random() * 900000);
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Expires in 5 minutes
         // Store OTP in MongoDB (Replace existing OTP if any)
-        await OTPModel.findOneAndUpdate(
+        await Otp.findOneAndUpdate(
             { email },
             { otp, expiresAt },
             { upsert: true, new: true }
@@ -182,7 +182,7 @@ export const resetPassword = async (req, res) => {
             return res.status(400).json({ error: "All fields are required" });
         }
         // Check if OTP exists
-        const otpEntry = await OTPModel.findOne({ email, otp });
+        const otpEntry = await Otp.findOne({ email, otp });
         if (!otpEntry) {
             return res.status(400).json({ error: "Invalid OTP" });
         }
@@ -196,7 +196,7 @@ export const resetPassword = async (req, res) => {
         // Update user password in MongoDB
         await User.findOneAndUpdate({ email }, { password: hashedPassword });
         // Delete OTP after successful reset
-        await OTPModel.deleteOne({ email });
+        await Otp.deleteOne({ email });
 
         res.status(200).json({ message: "Password reset successful" });
     } catch (error) {
