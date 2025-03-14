@@ -3,9 +3,9 @@ import Admin from "../models/admin.model";
 
 export const adminAuth=async(req,res)=>{
     try {
-      const authorization=req.header.authorization;
-      const token=authorization.split(" ")[1];
-       if (!token) {
+        const authorization=req.header.authorization;
+        const token=authorization.split(" ")[1];
+        if (!token) {
         return res.status(401).json({ message: "Unauthorized - No Token Provided" });
         }
 
@@ -26,3 +26,4 @@ export const adminAuth=async(req,res)=>{
         
     }
 }
+
