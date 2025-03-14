@@ -5,13 +5,13 @@ const adminSchema=new Schema({
         type:String,
         required:true,
         unique:true,
-    },
+    },  
     fullname:{
         type:String,
         required:true,
     },
     password:{
-        type:String,
+        type:String,    
         required:true,
         minlength:6,
     }

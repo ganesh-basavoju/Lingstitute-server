@@ -20,6 +20,15 @@ const userSchema = new mongoose.Schema(
         type: String,
         default: "https://img.icons8.com/?size=100&id=IerOpHeUt2OH&format=png&color=000000",
         },
+        phoneNumber:{
+        type:Number,
+        validate:{
+            validator:(v)=>{
+                return /^\d{10}$/.test(v.toString());
+            },
+            message:props=>`${props.value} is not a valid one`
+        }
+        }
     },
     { timestamps: true }
 );
