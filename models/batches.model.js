@@ -7,7 +7,21 @@ const batchesSchema=new Schema({
         unique:true,
     },
     students:[{studnet_id:mongoose.Schema.Types.ObjectId,ref:"Students"}],
+    course_content:[
+        {
+            title:{type:String,required:true},
+            fileUrl:{type:String,required:true},
+            file_id:{type:String,required:true},
+        }
+    ],
+    course_videos:[
+        {
+            title:{type:String,required:true},
+            videoUrl:{type:String,required:true}
+        }
+    ]
     
-},{timestamps:true})
+},{timestamps:true});
+const batchesModel=model("batches",batchesSchema);
 
-        
+export default batchesModel;
