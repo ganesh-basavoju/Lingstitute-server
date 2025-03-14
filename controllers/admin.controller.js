@@ -185,12 +185,27 @@ export const joinStudent_into_batch=async(req,res)=>{
 
 
 
-export const Video_Uploader=async(req,res)=>{
+export const Video_Uploader = async (req, res) => {
     try {
-        
-        
-    } catch (error) {
-     res.status(500).json({ msg: "Internal Server Error", error: error.message });   
+        const { title, VideoUrl, batch_name } = req.body;
 
+        if (!title || !VideoUrl || !batch_name) {
+            return res.status(400).json({ msg: "Please provide required credentials" });
+        }
+
+     
+        const batch = await batchesModel.findOne({ batch_name });
+
+        if (!batch) {
+            return res.status(404).json({ msg: "Batch not found" });
+        }
+
+        batch.course_videos.push({ title, videoUrl: VideoUrl });
+        await batch.save();
+
+        res.status(200).json({ msg: "Video added successfully", batch });
+
+    } catch (error) {
+        res.status(500).json({ msg: "Internal Server Error", error: error.message });
     }
-}
+};
