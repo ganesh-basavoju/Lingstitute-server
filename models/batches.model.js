@@ -6,7 +6,7 @@ const batchesSchema=new Schema({
         required:true,
         unique:true,
     },
-    students:[{studnet_id:mongoose.Schema.Types.ObjectId,ref:"Students"}],
+    students:[{type:mongoose.Schema.Types.ObjectId,ref:"Students"}],
     course_content:[
         {
             title:{type:String,required:true},

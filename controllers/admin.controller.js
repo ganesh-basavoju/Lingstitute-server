@@ -1,9 +1,9 @@
-import { drive } from "../lib/pdfupload";
-import { generateToken } from "../lib/utils";
-import Admin from "../models/admin.model";
-import batchesModel from "../models/batches.model";
-import classesModel from "../models/classes.model";
-import User from "../models/user.model";
+import { drive } from "../lib/pdfupload.js";
+import { generateToken } from "../lib/utils.js";
+import Admin from "../models/admin.model.js";
+import batchesModel from "../models/batches.model.js";
+import classesModel from "../models/classes.model.js";
+import User from "../models/user.model.js";
 // import bcrypt from "bcryptjs"; 
 
 export const adminLogin = async (req, res) => {

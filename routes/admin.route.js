@@ -1,8 +1,8 @@
 import express from "express";
 import multer from "multer";
-import { uploadToDrive } from "../lib/pdfupload";
-import { adminLogin, scheduleClass, deleteClass, joinStudent_into_batch, Video_Uploader, fetchAllUsers, deleteFile, uploadPdf} from "../controllers/admin.controller";
-import { adminAuth } from "../middleware/admin.middleware";
+import { uploadToDrive } from "../lib/pdfupload.js";
+import { adminLogin, scheduleClass, deleteClass, joinStudent_into_batch, Video_Uploader, fetchAllUsers, deleteFile, uploadPdf} from "../controllers/admin.controller.js";
+import { adminAuth } from "../middleware/admin.middleware.js";
 
 const router=express.Router();
 
