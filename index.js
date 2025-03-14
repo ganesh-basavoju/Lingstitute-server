@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
-import uploadRoutes from "./routes/upload.route.js";
 import newsRoutes from "./routes/news.route.js";
 import { app, server } from "./lib/socket.js";
 
@@ -27,7 +26,6 @@ app.set("trust proxy", 1);
 
 
 app.use("/api/auth", authRoutes);
-app.use("/api", uploadRoutes);
 app.use("/api", newsRoutes);
 
 
