@@ -4,7 +4,35 @@ import Admin from "../models/admin.model.js";
 import batchesModel from "../models/batches.model.js";
 import classesModel from "../models/classes.model.js";
 import User from "../models/user.model.js";
-// import bcrypt from "bcryptjs"; 
+import bcrypt from "bcryptjs"; 
+
+export const adminSignup = async (req, res) => {
+    const { fullName, email, password } = req.body;
+    try {
+        if (!fullName || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters" });
+        }
+
+        const existingUser = await Admin.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "Email already exists" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new Admin({ fullName, email, password: hashedPassword });
+
+        await newUser.save();
+        
+
+        res.status(201).json(newUser);
+    } catch (error) {
+        console.error("Signup Error:", error.message);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
 
 export const adminLogin = async (req, res) => {
     try {
@@ -22,8 +50,8 @@ export const adminLogin = async (req, res) => {
         }
 
         // Validate password securely
-        // const isPasswordValid = await bcrypt.compare(password, admin.password);
-        const isPasswordValid=(password==admin.password);
+        const isPasswordValid = await bcrypt.compare(password, admin.password);
+        //isPasswordValid=(password==admin.password);
         if (!isPasswordValid) {
             return res.status(401).json({ msg: "Invalid credentials" });
         }
@@ -36,9 +64,6 @@ export const adminLogin = async (req, res) => {
         res.status(500).json({ msg: "Internal Server Error occurred", error: error.message });
     }
 };
-
-
-
 
 export const scheduleClass = async (req, res) => {
     try {
@@ -66,8 +91,6 @@ export const scheduleClass = async (req, res) => {
         res.status(500).json({ msg: "Internal Server Error occurred", error: error.message });
     }
 };
-
-
 
 export const deleteClass = async (req, res) => {
     try {
@@ -134,8 +157,6 @@ export const deleteFile = async (req, res) => {
     }
 };
 
-
-
 export const fetchAllUsers = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
@@ -167,7 +188,6 @@ export const fetchAllUsers = async (req, res) => {
     }
 };
 
-
 export const joinStudent_into_batch=async(req,res)=>{
     try {
         const {batch_name,student_id}=req.body;
@@ -182,8 +202,6 @@ export const joinStudent_into_batch=async(req,res)=>{
      res.status(500).json({ msg: "Internal Server Error", error: error.message });   
     }
 }
-
-
 
 export const Video_Uploader = async (req, res) => {
     try {

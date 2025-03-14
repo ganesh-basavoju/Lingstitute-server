@@ -19,17 +19,13 @@ const formatUserResponse = (user) => ({
     fullName: user.fullName,
     email: user.email,
     profilePic: user.profilePic,
-    recipes_created: user.recipes_created_cnt || 0,
-    fav_recipes: user.fav_recipes || [],
-    list_recipes: user.list_recipes || [],
-    fav_recipes_cnt: user.fav_recipes_cnt || 0,
 });
 
 // Signup Controller
 export const signup = async (req, res) => {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, phoneNumber} = req.body;
     try {
-        if (!fullName || !email || !password) {
+        if (!fullName || !email || !password || !phoneNumber) {
             return res.status(400).json({ message: "All fields are required" });
         }
         if (password.length < 6) {
@@ -117,7 +113,7 @@ export const forgotPassword = async (req, res) => {
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
-            subject: "Password Reset OTP - RecipeShare",
+            subject: "Password Reset OTP - Lingstitute",
             text: `Your OTP for password reset is: ${otp}\nThis OTP is valid for 5 minutes.`,
         };
         // Send Email

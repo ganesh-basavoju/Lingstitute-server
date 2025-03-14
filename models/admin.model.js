@@ -6,7 +6,7 @@ const adminSchema=new Schema({
         required:true,
         unique:true,
     },  
-    fullname:{
+    fullName:{
         type:String,
         required:true,
     },
