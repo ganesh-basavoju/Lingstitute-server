@@ -135,7 +135,6 @@ export const uploadPdf=async(req,res)=>{
     }
 }
 
-
 export const deleteFile = async (req, res) => {
     try {
         const { file_id, batch_id } = req.body;
