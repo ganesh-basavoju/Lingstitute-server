@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import newsRoutes from "./routes/news.route.js";
 import { app, server } from "./lib/socket.js";
+import batchesRoutes from "./routes/batches.route.js";
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: "http://localhost:8080",
         credentials: true,
     })
 );
@@ -29,6 +30,7 @@ app.set("trust proxy", 1);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api", newsRoutes);
+app.use("/api/batch",batchesRoutes);
 
 
 
