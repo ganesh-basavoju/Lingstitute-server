@@ -6,6 +6,7 @@ import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import newsRoutes from "./routes/news.route.js";
+import zoomRoutes from "./routes/zoom.route.js";
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
@@ -45,6 +46,7 @@ app.set("trust proxy", 1);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api", newsRoutes);
+app.use('/api/zoom', zoomRoutes);
 
 
 
