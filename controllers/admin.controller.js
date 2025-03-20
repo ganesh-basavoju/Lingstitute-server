@@ -1,3 +1,4 @@
+import axios from "axios";
 import { drive } from "../lib/pdfupload.js";
 import { generateToken } from "../lib/utils.js";
 import Admin from "../models/admin.model.js";
@@ -5,6 +6,7 @@ import batchesModel from "../models/batches.model.js";
 import classesModel from "../models/classes.model.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs"; 
+import moment from "moment-timezone";
 
 export const adminSignup = async (req, res) => {
     const { fullName, email, password } = req.body;
@@ -67,35 +69,83 @@ export const adminLogin = async (req, res) => {
 };
 
 
+const ZOOM_API_KEY = "k6s4ukVAR0OnzuIe5ZAxIw";
+const ZOOM_API_SECRET = "W3hbG0fGI7fY7MQX0XQ9eurwkBYV7aAW";
+
+const createZoomMeeting = async (title, date, time) => {
+    try {
+        // Convert local time to UTC
+        const startTimeUTC = moment.tz(`${date} ${time}`, "YYYY-MM-DD HH:mm", "Asia/Kolkata").utc().format();
+
+        const zoomResponse = await axios.post(
+            "https://api.zoom.us/v2/users/me/meetings",
+            {
+                topic: title,
+                type: 2, // Scheduled meeting
+                start_time: startTimeUTC, // Pass UTC time
+                duration: 60, // 1 hour
+                timezone: "UTC", // Always set to UTC
+                settings: {
+                    host_video: true,
+                    participant_video: true,
+                    join_before_host: false,
+                    mute_upon_entry: true,
+                },
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${ZOOM_API_KEY}.${ZOOM_API_SECRET}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        return zoomResponse.data.join_url;
+    } catch (error) {
+        console.error("Error creating Zoom meeting:", error.response?.data || error.message);
+        throw new Error("Failed to create Zoom meeting");
+    }
+};
+
 
 export const scheduleClass = async (req, res) => {
     try {
         const { batchId, title, date, time, description } = req.body;
 
-
         // Validate required fields
         if (!batchId || !title || !date || !time) {
             return res.status(400).json({ msg: "Please provide all required fields" });
         }
-       const batch=await batchesModel.findById(batchId);
+
+        const batch = await batchesModel.findById(batchId);
+        if (!batch) {
+            return res.status(404).json({ msg: "Batch not found" });
+        }
+
+        // Create Zoom meeting
+        const meetingLink = await createZoomMeeting(title, date, time);
+
         // Create new class
         const newClass = new classesModel({
-            batchname:batch.batch_name,
+            batchname: batch.batch_name,
             title,
             date,
             time,
-            description: description || "" // Set an empty string if no description is provided
+            description: description || "",
+            link: meetingLink, // Store Zoom meeting link
         });
 
         // Save to database
         const savedClass = await newClass.save();
         batch.scheduledClasses.push(savedClass.id);
-        batch.save();
+        await batch.save();
+
         res.status(201).json({ msg: "Class scheduled successfully", class: savedClass });
     } catch (error) {
         res.status(500).json({ msg: "Internal Server Error occurred", error: error.message });
     }
 };
+
 
 
 export const deleteClass = async (req, res) => {
