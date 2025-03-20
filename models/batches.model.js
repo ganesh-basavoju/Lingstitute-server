@@ -6,7 +6,7 @@ const batchesSchema=new Schema({
         required:true,
         unique:true,
     },
-    students:[{type:mongoose.Schema.Types.ObjectId,ref:"Students"}],
+    students:[{type:mongoose.Schema.Types.ObjectId,ref:"User"}],
     course_content:[
         {
             title:{type:String,required:true},
@@ -19,6 +19,9 @@ const batchesSchema=new Schema({
             title:{type:String,required:true},
             videoUrl:{type:String,required:true}
         }
+    ],
+    scheduledClasses:[
+        {type:Schema.Types.ObjectId,ref:"classes"},
     ]
     
 },{timestamps:true});

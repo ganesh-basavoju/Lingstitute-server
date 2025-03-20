@@ -8,6 +8,7 @@ import adminRoutes from "./routes/admin.route.js";
 import newsRoutes from "./routes/news.route.js";
 import zoomRoutes from "./routes/zoom.route.js";
 import { app, server } from "./lib/socket.js";
+import batchesRoutes from "./routes/batches.route.js";
 
 dotenv.config();
 
@@ -46,6 +47,7 @@ app.set("trust proxy", 1);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api", newsRoutes);
+app.use("/api/batch",batchesRoutes);
 app.use('/api/zoom', zoomRoutes);
 
 
