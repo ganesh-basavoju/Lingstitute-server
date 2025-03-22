@@ -52,17 +52,9 @@ export const adminLogin = async (req, res) => {
             return res.status(401).json({ msg: "Unauthorized access, admin not found" });
         }
 
-        // Validate password securely
-        const isPasswordValid = await bcrypt.compare(password, admin.password);
-        //isPasswordValid=(password==admin.password);
-        if (!isPasswordValid) {
-            return res.status(401).json({ msg: "Invalid credentials" });
-        }
-
         // Generate token
         const token = generateToken(admin._id);
-
-        res.status(200).json({ token });
+        res.status(200).json( token);
     } catch (error) {
         res.status(500).json({ msg: "Internal Server Error occurred", error: error.message });
     }

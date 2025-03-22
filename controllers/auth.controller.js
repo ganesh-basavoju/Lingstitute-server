@@ -32,22 +32,22 @@ const generateTokenAndReturn = (user) => {
 
 // ✅ Signup Controller
 export const signup = async (req, res) => {
-  const { fullName, email, password, phoneNumber } = req.body;
-
+  const { fullName, email, password } = req.body;
+  console.log(req.body);
   try {
     if (!fullName || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ msg: "All fields are required" });
     }
 
     if (password.length < 6) {
       return res.status(400).json({
         message: "Password must be at least 6 characters long",
-      });
+      });   
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json({ msg: "Email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -55,20 +55,14 @@ export const signup = async (req, res) => {
       fullName,
       email,
       password: hashedPassword,
-      phoneNumber,
     });
 
     await newUser.save();
 
-    const token = generateTokenAndReturn(newUser);
-
-    res.status(201).json({
-      token,
-      user: formatUserResponse(newUser),
-    });
+    res.status(201).json({msg:"User Created Successfully"});
   } catch (error) {
     console.error("Signup Error:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
