@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema(
         },
         password: {
         type: String,
-        required: true,
         minlength: 6,
         },
         profilePic: {
@@ -32,7 +31,9 @@ const userSchema = new mongoose.Schema(
         isStudent:{
             type:Boolean,
             default:false
-        }
+        },
+        google_id: { type: String, unique: true },
+
     },
     { timestamps: true }
 );

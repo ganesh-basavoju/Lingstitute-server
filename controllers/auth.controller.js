@@ -10,7 +10,7 @@ import { OAuth2Client } from "google-auth-library";
 
 dotenv.config();
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ✅ Helper function to format user response
@@ -152,56 +152,41 @@ export const forgotPassword = async (req, res) => {
 
 // ✅ Google Login Controller
 export const googleLogin = async (req, res) => {
-    const { token } = req.body;
-  
-    try {
-      // ✅ Verify ID token using Google's client library
-      const ticket = await googleClient.verifyIdToken({
-        idToken: token, // ID token instead of access token
-        audience: process.env.GOOGLE_CLIENT_ID,
+  const { token } = req.body;
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: google_id, email, name, picture } = payload;
+
+    let user = await User.findOne({ $or: [{ google_id }, { email }] });
+
+    if (!user) {
+      user = await User.create({
+        google_id,
+        fullName: name,
+        email,
+        profilePic: picture,
       });
-  
-      if (!ticket) {
-        return res.status(401).json({ message: "Invalid Google token" });
-      }
-  
-      // ✅ Extract payload
-      const payload = ticket.getPayload();
-      if (!payload) {
-        return res.status(401).json({ message: "Invalid token payload" });
-      }
-  
-      const { sub: googleId, email, name, picture } = payload;
-  
-      if (!email) {
-        return res.status(400).json({ message: "Email is required" });
-      }
-  
-      // ✅ Check if user already exists
-      let user = await User.findOne({ $or: [{ google_id: googleId }, { email }] });
-  
-      if (!user) {
-        user = new User({
-          google_id: googleId,
-          email,
-          fullName: name,
-          profilePic: picture,
-        });
-        await user.save();
-      }
-  
-      // ✅ Generate JWT token
-      const authToken = generateTokenAndReturn(user);
-  
-      return res.status(user ? 200 : 201).json({
-        token: authToken,
-        user: formatUserResponse(user),
-      });
-    } catch (error) {
-      console.error("Google Login Error:", error.message);
-      return res.status(401).json({ message: "Invalid Google token" });
     }
-  };
+
+    const jwtToken = generateToken(user._id);
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      token: jwtToken,
+    });
+  } catch (error) {
+    console.error("Error verifying Google Token:", error);
+    res.status(400).json({ message: "Invalid Google Token" });
+  }
+};
   
   
 
