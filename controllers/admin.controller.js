@@ -4,10 +4,9 @@ import { generateToken } from "../lib/utils.js";
 import Admin from "../models/admin.model.js";
 import batchesModel from "../models/batches.model.js";
 import classesModel from "../models/classes.model.js";
-import { authorizeZoom, zoomCallback, createMeeting } from "../controllers/zoom.controller.js"
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs"; 
-import moment from "moment-timezone";
+
 
 export const adminSignup = async (req, res) => {
     const { fullName, email, password } = req.body;
@@ -142,27 +141,55 @@ export const deleteClass = async (req, res) => {
 };
 
 
-export const uploadPdf=async(req,res)=>{
-    try{
-        const {batch_name,fileUrl,title}=req.body;
 
-        if(!batch||!fileUrl||!title) res.status(400).json({msg:"missing required information to upload"});
+export const uploadPdf = async (req, res) => {
+    try {
+        const { batchId, fileUrl, title, fileId, moduleName } = req.body;
+        console.log("Entered into uploadPdf func", req.body);
 
-        const  batch=await batchesModel.findOne({batch_name:batch_name});
+        if (!batchId || !fileUrl || !title || !fileId || !moduleName) {
+            return res.status(400).json({ msg: "Missing required information to upload" });
+        }
 
-        if(!batch) res.status(402).json({msg:"batch is not found"});
+        const batch = await batchesModel.findById(batchId);
+        if (!batch) {
+            return res.status(404).json({ msg: "Batch not found" });
+        }
 
-        batch.course_content.push({
-            title:title,
-            fileUrl:fileUrl
-        });
-        batch.save();
-        res.status(200).json({msg:"uploaded succesffully",batch:batch});
+        // Check if module exists
+        let existingModule = batch.course_content.find(item => item.moduleName === moduleName);
 
-    }catch(error){
+        if (existingModule) {
+            // If module exists, push the new file to the module's data array
+            existingModule.data.push({
+                title: title,
+                fileUrl: fileUrl,
+                file_id: fileId
+            });
+        } else {
+            // If module doesn't exist, create a new module and push it to course_content
+            batch.course_content.push({
+                moduleName: moduleName,
+                data: [{
+                    title: title,
+                    fileUrl: fileUrl,
+                    file_id: fileId
+                }]
+            });
+        }
+
+        // Save updated batch
+        await batch.save();
+
+        res.status(200).json({ msg: "Uploaded successfully", batch });
+
+    } catch (error) {
+        console.error("Error in uploadPdf:", error);
         res.status(500).json({ msg: "Internal Server Error occurred", error: error.message });
     }
-}
+};
+
+
 
 export const deleteFile = async (req, res) => {
     try {
@@ -239,6 +266,7 @@ export const joinStudent_into_batch = async (req, res) => {
         await batch.save();
          const user=await User.findById(student_id);
         user.isStudent=true;
+        user.enrolled_batch=batch.batch_name;
         await user.save();
         console.log("user",user);
 
@@ -489,10 +517,11 @@ export const Remove_From_Batch = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
     user.isStudent=false;
+    user.enrolled_batch="";
     user.save();
     const updatedBatch = await batchesModel.findOneAndUpdate(
       {batch_name:batch},
-      { $pull: { students: user._id } },
+      { $pull: { students: user._id }},
       { new: true }
     );
 

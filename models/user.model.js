@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const userSchema = new mongoose.Schema(
     {
@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema(
             default:false
         },
         google_id: { type: String, unique: true },
+        enrolled_batch:{type:String},
 
     },
     { timestamps: true }

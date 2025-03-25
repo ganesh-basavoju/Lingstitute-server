@@ -11,13 +11,18 @@ const batchesSchema=new Schema({
         required:true,
     },
     students:[{type:mongoose.Schema.Types.ObjectId,ref:"User"}],
-    course_content:[
-        {
-            title:{type:String,required:true},
-            fileUrl:{type:String,required:true},
-            file_id:{type:String,required:true},
-        }
-    ],
+    course_content:
+        [
+            {
+               moduleName:{type:String,required:true},
+               data: [{
+                    title:{type:String,required:true},
+                    fileUrl:{type:String,required:true},
+                    file_id:{type:String,required:true},
+                 }]
+            }
+        ]
+    ,
     course_videos:[
         {
             title:{type:String,required:true},

@@ -20,6 +20,7 @@ const formatUserResponse = (user) => ({
   email: user.email,
   profilePic: user.profilePic || "",
   isStudent: user.isStudent,
+  enrolled_batch:user.enrolled_batch
 });
 
 // ✅ Helper to generate token and return in response

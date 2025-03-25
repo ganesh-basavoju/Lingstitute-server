@@ -2,14 +2,14 @@ import batchesModel from "../models/batches.model.js";
 
 export const Get_Batch = async (req, res) => {
     try {
-        const  batch_name  ="Batch1";
+        const {batch_name} =req.query;
         //  req.query;
 
         if (!batch_name || batch_name.trim() === "") {
             return res.status(400).json({ msg: "Batch name is required" });
         }
 
-        const batch = await batchesModel.findOne({ batch_name }).select("batch_name batch_description course_content course_videos scheduledClasses").populate("scheduledClasses").sort({createdAt:-1});
+        const batch = await batchesModel.findOne({ batch_name }).select("batch_name batch_description course_content course_videos scheduledClasses createdAt").populate("scheduledClasses").sort({createdAt:-1});
 
         if (!batch) {
             return res.status(404).json({ msg: "No batch found" });

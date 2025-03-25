@@ -23,7 +23,7 @@ router.delete("/delete-file", adminAuth,deleteFile);
 router.get("/fetch-users",fetchAllUsers);
 router.post("/join-students-to-batch", joinStudent_into_batch);
 router.post("/video-upload", Video_Uploader);
-router.post("/new-branch",Create_Batch);
+router.post("/new-batch",Create_Batch);
 router.delete("/delete-batch",Delete_Batch);
 router.put("/edit-batchname",Update_Batch);
 router.get("/get-batches",Get_All_Batches);
