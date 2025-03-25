@@ -6,6 +6,10 @@ const batchesSchema=new Schema({
         required:true,
         unique:true,
     },
+    batch_description:{
+        type:String,
+        required:true,
+    },
     students:[{type:mongoose.Schema.Types.ObjectId,ref:"User"}],
     course_content:[
         {

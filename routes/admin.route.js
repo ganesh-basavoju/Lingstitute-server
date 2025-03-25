@@ -26,7 +26,7 @@ router.post("/video-upload", Video_Uploader);
 router.post("/new-branch",Create_Batch);
 router.delete("/delete-batch",Delete_Batch);
 router.put("/edit-batchname",Update_Batch);
-router.get("/get-branches",Get_All_Batches);
+router.get("/get-batches",Get_All_Batches);
 router.get("/get-user-by-mail",Get_User_By_Mail);
 router.delete("/delete-user",Delete_User);
 //

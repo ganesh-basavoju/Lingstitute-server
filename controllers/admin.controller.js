@@ -219,6 +219,7 @@ export const fetchAllUsers = async (req, res) => {
 
 export const joinStudent_into_batch = async (req, res) => {
     try {
+      console.log(req.body,"cdjc");
         const { batchId, student_id } = req.body;
 
         if (!batchId || !student_id) {
@@ -236,6 +237,10 @@ export const joinStudent_into_batch = async (req, res) => {
 
         batch.students.push(student_id);
         await batch.save();
+         const user=await User.findById(student_id);
+        user.isStudent=true;
+        await user.save();
+        console.log("user",user);
 
         res.status(200).json({ msg: `Successfully added student to batch ${batchId}` });
 
@@ -271,7 +276,7 @@ export const Video_Uploader = async (req, res) => {
 
 export const Create_Batch = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name,description } = req.body;
 
     if (!name) {
       return res.status(400).json({ msg: "Batch name is required" });
@@ -284,9 +289,9 @@ export const Create_Batch = async (req, res) => {
     }
 
    
-    const newBatch = await batchesModel.create({ batch_name: name });
+    const newBatch = await batchesModel.create({ batch_name: name ,batch_description:description});
 
-    return res.status(201).json({ msg: "Batch created successfully", batch: {id:newBatch._id,batch_name:newBatch.batch_name,student_count:0}});
+    return res.status(201).json({ msg: "Batch created successfully", batch: {id:newBatch._id,batch_name:newBatch.batch_name,student_count:0,batch_description:newBatch.batch_description}});
   } catch (error) {
     return res.status(500).json({ msg: "Internal Server Error", error: error.message });
   }
@@ -318,52 +323,47 @@ export const Delete_Batch = async (req, res) => {
 
 export const Update_Batch = async (req, res) => {
   try {
-    const { id } = req.body; // Get batch ID from URL params
-    const { name } = req.body; // Get new batch name from request body
+    const { id, name, batchDescription } = req.body;
 
     // Validate input
-    if (!id) {
-      return res.status(400).json({ msg: "Batch ID is required" });
-    }
-    if (!name) {
-      return res.status(400).json({ msg: "New batch name is required" });
-    }
+    if (!id) return res.status(400).json({ msg: "Batch ID is required" });
+    if (!name) return res.status(400).json({ msg: "New batch name is required" });
 
-    // Check if batch exists
-    const existingBatch = await batchesModel.findById(id);
-    if (!existingBatch) {
-      return res.status(404).json({ msg: "Batch not found" });
-    }
+    // Check if the new name already exists in another batch
+    const duplicateBatch = await batchesModel.findOne({ batch_name: name, _id: { $ne: id } });
+    if (duplicateBatch) return res.status(400).json({ msg: "Batch name already exists" });
 
-    // Check if the new name is already taken
-    const duplicateBatch = await batchesModel.findOne({ batch_name: name });
-    if (duplicateBatch) {
-      return res.status(400).json({ msg: "Batch name already exists" });
-    }
-
+    // Update batch name and description in a single query
     const updatedBatch = await batchesModel.findByIdAndUpdate(
       id,
-      { batch_name: name },
-      { new: true } 
+      { batch_name: name, batch_description: batchDescription || undefined },
+      { new: true, select: "batch_name batch_description" } // Return only necessary fields
     );
 
-    return res.status(200).json({ msg: "Batch name updated successfully", batch:updatedBatch.batch_name});
+    if (!updatedBatch) return res.status(404).json({ msg: "Batch not found" });
+
+    return res.status(200).json({
+      msg: "Batch updated successfully",
+      data: { batch_name: updatedBatch.batch_name, batch_description: updatedBatch.batch_description },
+    });
   } catch (error) {
     return res.status(500).json({ msg: "Internal Server Error", error: error.message });
   }
 };
 
 
+
 export const Get_All_Batches = async (req, res) => {
   try {
     // Fetch all batches with student count
-    const batches = await batchesModel.find({}, "batch_name students").lean(); // Fetch only batch_name & students
+    const batches = await batchesModel.find({}); // Fetch only batch_name & students
 
     // Transform data to include student count
     const formattedBatches = batches.map(batch => ({
       id:batch._id,
       batch_name: batch.batch_name,
-      student_count: batch.students.length, // Get student count
+      student_count: batch.students.length,
+      batch_description:batch.batch_description // Get student count
     }));
 
     return res.status(200).json({ msg: "Batches fetched successfully", batches: formattedBatches });
@@ -488,7 +488,7 @@ export const Remove_From_Batch = async (req, res) => {
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
-    user.isStudent=true;
+    user.isStudent=false;
     user.save();
     const updatedBatch = await batchesModel.findOneAndUpdate(
       {batch_name:batch},
