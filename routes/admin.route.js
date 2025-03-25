@@ -11,9 +11,10 @@ const upload = multer({
     limits: { fileSize: 50 * 1024 * 1024 }, 
 });
 
-router.post("/upload-drive", adminAuth, upload.single("file"), uploadToDrive);
 router.post("/signup", adminSignup);
 router.post("/login", adminLogin);
+router.use(adminAuth);
+router.post("/upload-drive", adminAuth, upload.single("file"), uploadToDrive);
 router.post("/schedule",scheduleClass);
 router.get("/schedule",Get_All_Schedules);
 router.delete("/schedule", deleteClass);

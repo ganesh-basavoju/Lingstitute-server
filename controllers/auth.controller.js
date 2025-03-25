@@ -19,6 +19,7 @@ const formatUserResponse = (user) => ({
   fullName: user.fullName,
   email: user.email,
   profilePic: user.profilePic || "",
+  isStudent: user.isStudent,
 });
 
 // ✅ Helper to generate token and return in response
@@ -176,10 +177,7 @@ export const googleLogin = async (req, res) => {
 
     const jwtToken = generateToken(user._id);
     res.status(200).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
+      user: formatUserResponse(user),
       token: jwtToken,
     });
   } catch (error) {

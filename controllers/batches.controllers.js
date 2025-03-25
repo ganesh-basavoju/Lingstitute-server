@@ -2,7 +2,8 @@ import batchesModel from "../models/batches.model.js";
 
 export const Get_Batch = async (req, res) => {
     try {
-        const { batch_name } = req.query;
+        const  batch_name  ="Batch1";
+        //  req.query;
 
         if (!batch_name || batch_name.trim() === "") {
             return res.status(400).json({ msg: "Batch name is required" });
