@@ -31,7 +31,7 @@ app.set("trust proxy", 1);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api", newsRoutes);
+app.use("/api/external", externalRoutes);
 app.use("/api/batch",batchesRoutes);
 app.use('/api/zoom', zoomRoutes);
 app.use("/api/user", userRoutes);
