@@ -8,20 +8,17 @@ import adminRoutes from "./routes/admin.route.js";
 import newsRoutes from "./routes/news.route.js";
 import userRoutes from "./routes/user.route.js";
 import zoomRoutes from "./routes/zoom.route.js";
-import { app, server } from "./lib/socket.js";
+import { app, server, io } from "./lib/socket.js";
 import batchesRoutes from "./routes/batches.route.js";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
-
-
-
-
+const PORT = 5001;
 app.use(express.json());
 app.use(cookieParser());
+
 const corsOptions = {
-    origin: "http://localhost:8080", // ✅ Frontend URL
+    origin: "http://localhost:8080", // Frontend URL
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -29,43 +26,53 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*"); // Allow any origin
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
-
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
-    }
-
-    next();
-});
-
 app.set("trust proxy", 1);
 
-
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api", newsRoutes);
-app.use("/api/batch",batchesRoutes);
-app.use('/api/zoom', zoomRoutes);
+app.use("/api/batch", batchesRoutes);
+app.use("/api/zoom", zoomRoutes);
 app.use("/api/user", userRoutes);
 
+const waitingUsers = [];
+const connectedPairs = new Map();
 
+io.on("connection", (socket) => {
+    console.log("New user connected:", socket.id);
+    
+    socket.on("join-video-chat", (peerId) => {
+        if (waitingUsers.length > 0) {
+            const otherUser = waitingUsers.pop();
+            connectedPairs.set(socket.id, otherUser.socketId);
+            connectedPairs.set(otherUser.socketId, socket.id);
+            
+            io.to(socket.id).emit("match-found", { peerId: otherUser.peerId });
+            io.to(otherUser.socketId).emit("match-found", { peerId });
+        } else {
+            waitingUsers.push({ socketId: socket.id, peerId });
+        }
+    });
 
-app.listen(PORT, () => {
-    console.log(`listening on port ${PORT}`);
-    connectDB();
+    socket.on("disconnect", () => {
+        console.log("User disconnected:", socket.id);
+        const partnerId = connectedPairs.get(socket.id);
+        if (partnerId) {
+            io.to(partnerId).emit("partner-disconnected");
+            connectedPairs.delete(partnerId);
+        }
+        connectedPairs.delete(socket.id);
+        
+        // Remove from waiting list if present
+        const index = waitingUsers.findIndex(user => user.socketId === socket.id);
+        if (index !== -1) {
+            waitingUsers.splice(index, 1);
+        }
+    });
 });
 
-
-
-
-
-
-
-// server.listen(PORT, () => {
-//   console.log("server is running on PORT:" + PORT);
-//   connectDB();
-// });
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    connectDB();
+});
