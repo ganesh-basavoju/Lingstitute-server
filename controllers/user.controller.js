@@ -48,6 +48,7 @@ export const registerForSeat = async (req, res) => {
 
 export const getUserProfile = async (req, res) => {
     try {
+        console.log(req.user);
         res.status(200).json(req.user);
         } catch (error) {
             console.error("Error fetching user profile:", error);
