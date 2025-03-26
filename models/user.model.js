@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
         },
         phoneNumber:{
         type:Number,
-        default:null,
+        default:9999999999,
         validate:{
             validator:(v)=>{
                 return /^\d{10}$/.test(v.toString());
