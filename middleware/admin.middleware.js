@@ -9,7 +9,7 @@ export const adminAuth=async(req,res,next)=>{
             return res.status(401).json({ message: "Unauthorized - No Token Provided" });
         }
         const token=authorization.split(" ")[1];
-        //const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Q0Njg5YjA2YTcyY2VhMGQ4MTY0NzgiLCJpYXQiOjE3NDE5NzM4NTMsImV4cCI6MTc0MjU3ODY1M30.o6BrZkYIYS8P2dHCf4n7LHGzKpEwrkjdvWR3gldHQhYeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Q0Njg5YjA2YTcyY2VhMGQ4MTY0NzgiLCJpYXQiOjE3NDE5NzQxNjQsImV4cCI6MTc0MjU3ODk2NH0.CDIjoOWb9NYdX-ZcXni7vUCd8eKXj5O9jcHWfOQctME";
+        
         if (!token) {
         return res.status(401).json({ message: "Unauthorized - No Token Provided" });
         }

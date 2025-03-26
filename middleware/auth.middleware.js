@@ -2,30 +2,36 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 
 export const protectRoute = async (req, res, next) => {
-    try {
-        const authorization=req.header.authorization;
-        const token=authorization.split(" ")[1];
-        if (!token) {
-        return res.status(401).json({ message: "Unauthorized - No Token Provided" });
-        }
+  try {
+    // Corrected to access 'req.headers.authorization'
+    const authorization = req.headers.authorization;
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        if (!decoded) {
-        return res.status(401).json({ message: "Unauthorized - Invalid Token" });
-        }
-
-        const user = await User.findById(decoded.userId).select("-password");
-
-        if (!user) {
-        return res.status(404).json({ message: "User not found" });
-        }
-
-        req.user = user;
-
-        next();
-    } catch (error) {
-        console.log("Error in protectRoute middleware: ", error.message);
-        res.status(500).json({ message: "Internal server error" });
+    // Check if authorization header exists and starts with "Bearer "
+    if (!authorization || !authorization.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Unauthorized - No Token Provided" });
     }
+
+    // Extract token after "Bearer "
+    const token = authorization.split(" ")[1];
+
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded) {
+      return res.status(401).json({ message: "Unauthorized - Invalid Token" });
+    }
+
+    // Find the user from the token's userId and exclude the password field
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Attach the user to the request
+    req.user = user;
+    next();
+  } catch (error) {
+    console.log("Error in protectRoute middleware: ", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };

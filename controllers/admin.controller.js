@@ -41,18 +41,15 @@ export const adminLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Validate input
         if (!email || !password) {
             return res.status(400).json({ msg: "Please provide the required credentials" });
         }
 
-        // Check if admin exists
         const admin = await Admin.findOne({ email });
         if (!admin) {
             return res.status(401).json({ msg: "Unauthorized access, admin not found" });
         }
 
-        // Generate token
         const token = generateToken(admin._id);
         res.status(200).json( token);
     } catch (error) {
