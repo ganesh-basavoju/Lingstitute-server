@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 
-const ZOOM_REDIRECT_URI = "http://localhost:5001/api/zoom/create-meeting";
+const ZOOM_REDIRECT_URI = "https://lingstitute-server.onrender.com/api/zoom/create-meeting";
 const ZOOM_CLIENT_ID="AhNjBZ3Q1KAsdLQ0Gl06Q";
 const ZOOM_CLIENT_SECRET="WnC5HuIPJbwy95o56EgQMKmcuRhYga3k";
 const ZOOM_ACCOUNT_ID="4iqozWQxRb2oppRS2xMG6g";
@@ -74,7 +74,7 @@ export const zoomCallback = async (req, res) => {
 
 
     console.log("✅ Zoom Access Token:", accessToken);
-    res.redirect("http://localhost:5001/api/zoom/create-meeting"); // Redirect to success page
+    res.redirect("https://lingstitute-server.onrender.com/api/zoom/create-meeting"); // Redirect to success page
   } catch (error) {
     console.error("❌ Error getting access token:", error.response.data);
     res.status(500).send("Error getting access token");
